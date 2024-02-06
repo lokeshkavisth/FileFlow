@@ -1,7 +1,13 @@
 import React from "react";
 import FileList from "./file-list";
+import { FileData } from "@/types/types";
 
-const DataTable = ({ data, onDeleteFile }) => {
+interface DataTableProps {
+  data: FileData[];
+  onDeleteFile: (fileId: string) => void;
+}
+
+const DataTable: React.FC<DataTableProps> = ({ data, onDeleteFile }) => {
   return (
     <section>
       <ul>

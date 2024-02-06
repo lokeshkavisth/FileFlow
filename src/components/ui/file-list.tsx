@@ -7,8 +7,13 @@ import { Button } from "./button";
 import { MdDelete } from "react-icons/md";
 import moment from "moment";
 import { useUser } from "@clerk/nextjs";
+import { FileData } from "@/types/types";
 
-const FileList = (props) => {
+interface FileListProps extends FileData {
+  onDeleteFile: (id: string) => void;
+}
+
+const FileList: React.FC<FileListProps> = (props) => {
   const { fileName, type, downloadURL, size, onDeleteFile, timeStemp, id } =
     props;
 
@@ -18,8 +23,8 @@ const FileList = (props) => {
   let fileSizeMB = String((size / 1024) * 2).split(".")[0];
 
   const timestampMoment = moment
-    .unix(timeStemp?.seconds)
-    .add(timeStemp?.nanoseconds / 1e9, "seconds");
+    .unix(timeStemp?.seconds || 0)
+    .add(timeStemp?.nanoseconds || 0 / 1e9, "seconds");
 
   const formattedDate = timestampMoment.format("YYYY-MM-DD");
 

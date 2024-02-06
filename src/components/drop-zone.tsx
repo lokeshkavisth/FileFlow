@@ -24,28 +24,36 @@ const DropZone: React.FC = () => {
 
   const maxFileSize = 20971520;
 
-  const uploadFile = async (file: File) => {
-    const userCollection = collection(database, "users", user?.id, "files");
+  const uploadFile = useCallback(
+    async (file: File) => {
+      const userCollection = collection(
+        database,
+        "users",
+        user?.id || "",
+        "files"
+      );
 
-    const docRef = await addDoc(userCollection, {
-      userId: user?.id,
-      fileName: file.name,
-      fullName: user?.fullName,
-      profileImg: user?.imageUrl,
-      timeStemp: serverTimestamp(),
-      type: file.type,
-      size: file.size,
-    });
-    const imgRef = ref(storage, `users/${user?.id}/files/${docRef.id}`);
+      const docRef = await addDoc(userCollection, {
+        userId: user?.id,
+        fileName: file.name,
+        fullName: user?.fullName,
+        profileImg: user?.imageUrl,
+        timeStemp: serverTimestamp(),
+        type: file.type,
+        size: file.size,
+      });
+      const imgRef = ref(storage, `users/${user?.id}/files/${docRef.id}`);
 
-    await uploadBytes(imgRef, file);
+      await uploadBytes(imgRef, file);
 
-    const downloadURL = await getDownloadURL(imgRef);
+      const downloadURL = await getDownloadURL(imgRef);
 
-    await updateDoc(doc(database, "users", user?.id, "files", docRef.id), {
-      downloadURL,
-    });
-  };
+      await updateDoc(doc(database, "users", user?.id, "files", docRef.id), {
+        downloadURL,
+      });
+    },
+    [user]
+  );
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -85,7 +93,7 @@ const DropZone: React.FC = () => {
         setLoading(false);
       }
     },
-    [loading, user]
+    [loading, setLoading, user, uploadFile]
   );
 
   return (

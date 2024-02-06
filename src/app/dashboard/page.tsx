@@ -12,21 +12,7 @@ import { useUser } from "@clerk/nextjs";
 import DropZone from "@/components/drop-zone";
 import DataTable from "@/components/ui/data-table";
 import { useEffect, useState } from "react";
-
-interface FileData {
-  id: string;
-  userId: string;
-  fileName: string;
-  fullName: string;
-  profileImg: string;
-  timeStemp: {
-    seconds: number;
-    nanoseconds: number;
-  };
-  type: string;
-  size: number;
-  downloadURL?: string;
-}
+import { FileData } from "@/types/types";
 
 const Dashboard: React.FC = () => {
   const [filesData, setFilesData] = useState<FileData[]>([]);
