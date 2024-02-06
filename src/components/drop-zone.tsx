@@ -48,7 +48,9 @@ const DropZone: React.FC = () => {
 
       const downloadURL = await getDownloadURL(imgRef);
 
-      await updateDoc(doc(database, "users", user?.id, "files", docRef.id), {
+      const userPath = user ? `users/${user.id}` : "";
+
+      await updateDoc(doc(database, userPath, "files", docRef.id), {
         downloadURL,
       });
     },
