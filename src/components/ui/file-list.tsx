@@ -36,7 +36,7 @@ const FileList: React.FC<FileListProps> = (props) => {
   return (
     <li className="grid grid-cols-6 items-center border-b hover:bg-gray-100 dark:hover:bg-gray-300 dark:hover:bg-opacity-5 py-1 text-xs px-3">
       <span className="w-4">
-        <FileIcon extension="docx" {...defaultStyles[fileType]} />
+        <FileIcon extension="docx" {...(defaultStyles as any)[fileType]} />
       </span>
       <p className="truncate w-28">{fileName.split(".")[0]}</p>
       <p>{formattedDate}</p>
