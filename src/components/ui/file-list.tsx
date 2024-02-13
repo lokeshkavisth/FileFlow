@@ -13,20 +13,18 @@ interface FileListProps extends FileData {
   onDeleteFile: (id: string) => void;
 }
 
-const FileList: React.FC<FileListProps> = (props) => {
+const FileList: React.FC<FileListProps> = React.memo((props) => {
   const { fileName, type, downloadURL, size, onDeleteFile, timeStemp, id } =
     props;
 
   const { user } = useUser();
 
   const fileType = type.split("/")[1];
-  let fileSizeMB = String((size / 1024) * 2).split(".")[0];
+  let fileSizeMB = (size / (1024 * 1024)).toFixed(2);
 
-  const timestampMoment = moment
+  const formattedDate = moment
     .unix(timeStemp?.seconds || 0)
-    .add(timeStemp?.nanoseconds || 0 / 1e9, "seconds");
-
-  const formattedDate = timestampMoment.format("YYYY-MM-DD");
+    .format("YYYY-MM-DD");
 
   const deleteFile = async () => {
     if (!user) return;
@@ -34,26 +32,40 @@ const FileList: React.FC<FileListProps> = (props) => {
     onDeleteFile(id);
   };
   return (
-    <li className="grid grid-cols-6 items-center border-b hover:bg-gray-100 dark:hover:bg-gray-300 dark:hover:bg-opacity-5 py-1 text-xs px-3">
+    <li
+      role="listitem"
+      className="grid grid-cols-6 items-center border-b hover:bg-gray-100 dark:hover:bg-gray-300 dark:hover:bg-opacity-5 py-1 text-xs px-3"
+    >
       <span className="w-4">
-        <FileIcon extension="docx" {...(defaultStyles as any)[fileType]} />
+        <FileIcon
+          extension={fileType || ""}
+          {...(defaultStyles as any)[fileType || ""]}
+        />
       </span>
       <p className="truncate w-28">{fileName.split(".")[0]}</p>
       <p>{formattedDate}</p>
       <p>{fileSizeMB} kb</p>
       <div>
         <a
+          role="link"
           href={downloadURL}
           className="flex items-center gap-1 hover:underline"
         >
           Download <DownloadIcon />
         </a>
       </div>
-      <Button className="max-w-max px-3" variant={"outline"}>
-        <MdDelete onClick={deleteFile} />
+      <Button
+        role="button"
+        onClick={deleteFile}
+        className="max-w-max px-3"
+        variant={"outline"}
+      >
+        <MdDelete />
       </Button>
     </li>
   );
-};
+});
+
+FileList.displayName = "FileList";
 
 export default FileList;
