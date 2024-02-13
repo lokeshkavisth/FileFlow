@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback } from "react";
-
 import { UploadIcon } from "@radix-ui/react-icons";
 import { useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
@@ -9,6 +8,7 @@ import Dropzone from "react-dropzone";
 import toast, { Toaster } from "react-hot-toast";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { database, storage } from "@/config/firebase";
+import debounce from "lodash/debounce";
 import {
   addDoc,
   collection,
@@ -22,10 +22,37 @@ const DropZone: React.FC = () => {
   const [loading, setLoading] = useLoading();
   const { user } = useUser();
 
-  const maxFileSize = 20971520;
+  const maxFileSize = 20 * 1024 * 1024;
+
+  const debouncedOnDrop = useCallback(
+    debounce(async (acceptedFiles: File[]) => {
+      if (!user || loading) return;
+
+      try {
+        for (const file of acceptedFiles) {
+          const toastID = toast.loading("Processing...");
+          setLoading(true);
+          if (file.size > maxFileSize) {
+            toast.error("File size should not exceed 20MB");
+            setLoading(false);
+            continue;
+          }
+
+          await uploadFile(file, toastID);
+        }
+      } catch (error) {
+        console.error("Error during file upload process:", error);
+        toast.error("Error during file upload process!");
+        setLoading(false);
+      } finally {
+        setLoading(false);
+      }
+    }, 400),
+    [loading, setLoading, user]
+  );
 
   const uploadFile = useCallback(
-    async (file: File) => {
+    async (file: File, toastID: string) => {
       const userCollection = collection(
         database,
         "users",
@@ -53,49 +80,10 @@ const DropZone: React.FC = () => {
       await updateDoc(doc(database, userPath, "files", docRef.id), {
         downloadURL,
       });
+
+      toast.success("File is Uploaded!", { id: toastID });
     },
     [user]
-  );
-
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      if (!user || loading) return;
-      setLoading(true);
-      const toastID = toast.loading(<b>Processing...</b>);
-
-      try {
-        acceptedFiles.forEach((file) => {
-          const reader = new FileReader();
-
-          reader.onabort = () =>
-            toast.error(<b>File reading was aborted!</b>, { id: toastID });
-
-          reader.onerror = () =>
-            toast.error(<b>File reading has failed!</b>, { id: toastID });
-          reader.onload = async () => {
-            try {
-              await uploadFile(file);
-
-              toast.success(<b>File is Uploaded!</b>, {
-                id: toastID,
-              });
-            } catch (error) {
-              console.error("Error during file upload:", error);
-            }
-          };
-
-          reader.readAsDataURL(file);
-        });
-      } catch (error) {
-        console.error("Error during file upload process:", error);
-        toast.error(<b>Error during file upload process!</b>, {
-          id: toastID,
-        });
-      } finally {
-        setLoading(false);
-      }
-    },
-    [loading, setLoading, user, uploadFile]
   );
 
   return (
@@ -108,7 +96,7 @@ const DropZone: React.FC = () => {
           }}
         />
       </div>
-      <Dropzone minSize={0} maxSize={maxFileSize} onDrop={onDrop}>
+      <Dropzone minSize={0} maxSize={maxFileSize} onDrop={debouncedOnDrop}>
         {({ getRootProps, getInputProps, isDragActive, isDragReject }) => (
           <section className="border-b">
             <div
