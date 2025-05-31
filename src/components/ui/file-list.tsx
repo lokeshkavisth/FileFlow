@@ -1,13 +1,16 @@
 "use client";
 
+import { FileData } from "@/types/types";
+import { useUser } from "@clerk/nextjs";
 import { DownloadIcon } from "@radix-ui/react-icons";
+import moment from "moment";
 import React from "react";
 import { FileIcon, defaultStyles } from "react-file-icon";
-import { Button } from "./button";
 import { MdDelete } from "react-icons/md";
-import moment from "moment";
-import { useUser } from "@clerk/nextjs";
-import { FileData } from "@/types/types";
+import { PiClipboard } from "react-icons/pi";
+import { Button, buttonVariants } from "./button";
+import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 interface FileListProps extends FileData {
   onDeleteFile: (id: string) => void;
@@ -31,10 +34,16 @@ const FileList: React.FC<FileListProps> = React.memo((props) => {
 
     onDeleteFile(id);
   };
+
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(downloadURL as string);
+    toast.success("Copied to clipboard");
+  };
+
   return (
     <li
       role="listitem"
-      className="grid grid-cols-6 items-center border-b hover:bg-gray-100 dark:hover:bg-gray-300 dark:hover:bg-opacity-5 py-1 text-xs px-3"
+      className="grid grid-cols-4 sm:grid-cols-5 items-center border-b hover:bg-gray-100 dark:hover:bg-gray-300 dark:hover:bg-opacity-5 py-1 text-xs px-3"
     >
       <span className="w-4">
         <FileIcon
@@ -44,24 +53,23 @@ const FileList: React.FC<FileListProps> = React.memo((props) => {
       </span>
       <p className="truncate w-28">{fileName.split(".")[0]}</p>
       <p>{formattedDate}</p>
-      <p>{fileSizeMB} kb</p>
+      <p className="hidden sm:block">{fileSizeMB} kb</p>
+
       <div>
         <a
           role="link"
           href={downloadURL}
-          className="flex items-center gap-1 hover:underline"
+          className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
         >
-          Download <DownloadIcon />
+          <DownloadIcon />
         </a>
+        <Button onClick={deleteFile} variant={"ghost"} size={"icon"}>
+          <MdDelete />
+        </Button>
+        <Button onClick={copyToClipboard} variant={"ghost"} size={"icon"}>
+          <PiClipboard />
+        </Button>
       </div>
-      <Button
-        role="button"
-        onClick={deleteFile}
-        className="max-w-max px-3"
-        variant={"outline"}
-      >
-        <MdDelete />
-      </Button>
     </li>
   );
 });

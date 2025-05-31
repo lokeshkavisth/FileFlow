@@ -13,14 +13,13 @@ const DataTable: React.FC<DataTableProps> = ({ data, onDeleteFile }) => {
       <ul role="listbox">
         <li
           role="listitem"
-          className="grid grid-cols-6 items-center border-b dark:bg-gray-300 dark:bg-opacity-5 bg-gray-100 py-3 text-xs px-3"
+          className="grid grid-cols-4 sm:grid-cols-5  items-center border-b dark:bg-gray-300 dark:bg-opacity-5 bg-gray-100 py-3 text-xs px-3"
         >
           <span>Type</span>
           <span>Filename</span>
           <span>Date Added</span>
-          <span>Size</span>
-          <span>Link</span>
-          <span>Delete</span>
+          <span className="hidden sm:block">Size</span>
+          <span>Actions</span>
         </li>
         {data?.map((file) => (
           <FileList key={file.id} onDeleteFile={onDeleteFile} {...file} />

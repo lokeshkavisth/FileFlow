@@ -1,4 +1,7 @@
 "use client";
+
+import { database } from "@/config/firebase";
+import { useUser } from "@clerk/nextjs";
 import {
   collection,
   deleteDoc,
@@ -6,13 +9,12 @@ import {
   getDocs,
   onSnapshot,
 } from "firebase/firestore";
-import { database } from "@/config/firebase";
-import { useUser } from "@clerk/nextjs";
 
 import DropZone from "@/components/drop-zone";
+import Stats from "@/components/stats";
 import DataTable from "@/components/ui/data-table";
-import { useEffect, useState } from "react";
 import { FileData } from "@/types/types";
+import { useEffect, useState } from "react";
 
 const Dashboard: React.FC = () => {
   const [filesData, setFilesData] = useState<FileData[]>([]);
@@ -59,8 +61,9 @@ const Dashboard: React.FC = () => {
   return (
     <section className="min-h-screen">
       <DropZone />
-      <div className="max-w-7xl mx-auto my-20">
+      <div className="max-w-7xl mx-auto my-20 space-y-10">
         <DataTable data={filesData} onDeleteFile={handleDeleteFile} />
+        <Stats data={filesData} />
       </div>
     </section>
   );
