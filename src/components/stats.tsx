@@ -1,3 +1,4 @@
+import { FileData } from "@/types/types";
 import {
   Card,
   CardContent,
@@ -6,7 +7,7 @@ import {
   CardTitle,
 } from "./ui/card";
 
-const Stats = ({ data }) => {
+const Stats = ({ data }: { data: FileData[] }) => {
   const totalStorageUsed = data.reduce((acc, { size }) => acc + size, 0);
   const convertToMB = (totalStorageUsed / 1024).toFixed(2);
 
